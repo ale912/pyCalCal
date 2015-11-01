@@ -45,5 +45,8 @@ Temporary Items
 *.txt
 LOVOZERO
 .idea
-
+__pycache__
+*.dat
+*.dir
+*.bak
 
