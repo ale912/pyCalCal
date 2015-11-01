@@ -1,6 +1,6 @@
 __author__ = 'Алексей Галкин'
 
-import os, datetime
+import os, datetime, shelve
 from PyQt5.QtWidgets import QWidget, QMessageBox
 from Application.ChooseCamera import ChooseCamera
 
@@ -35,14 +35,11 @@ class MainWidget(QWidget):
         # Проверяем файлы
         files = os.listdir(os.getcwd())
         log0, res0 = findFile('LOVOZERO', files)
-        log1, res1 = findFile('lovdat.txt', files)
 
-        if res0 and res1:
+        if res0:
             self.calculate()
         else:
-            line = ''
-            line += 'LOVOZERO{0}'.format(' и ' if res1 == False else '') if res0 == False else ''
-            line += 'lovdat.txt' if res1 == False else ''
+            line = 'LOVOZERO'
             QMessageBox.critical(self, 'Ошибка!', 'Нет файла {0}'.format(line))
             self.close()
 
@@ -50,7 +47,7 @@ class MainWidget(QWidget):
         lovdat = self.read_lovdat()
         if len(lovdat):
             oldExps, oldGains, resultfiles = {k: 1 for k in lovdat}, {k: 1 for k in lovdat}, \
-                                             {k: open('cal{0}.txt'.format(k), 'w') for k in lovdat}
+                                             {k: open('result/cal{0}.txt'.format(k), 'w') for k in lovdat}
             lovozero = self.read_LOVOZERO()
             while True:
                 try:
@@ -59,9 +56,8 @@ class MainWidget(QWidget):
                 except StopIteration:
                     break
 
-                exp, gain = 1, 1
-
                 for name in lovdat:
+                    exp, gain = 1, 1
                     data = lovdat[name]
                     if data.az(-1) > az0:
                         exp = data.exp(-1)
@@ -147,26 +143,16 @@ class MainWidget(QWidget):
 
     def read_lovdat(self):
         res = {}
-        print('Чтение файла lovdat.txt...')
-        names = open('lovdat.txt').readline().rstrip().split()
-        # Form
-        choose = ChooseCamera(names.copy(), self)
-        choose.exec()
-        #########
-        for i, name in enumerate(names):
-            if name in choose.cameras:
-                data = Data([])
-                file = open('lovdat.txt')
-                next(file)
-                for line in file:
-                    mas = line.rstrip().split()
-                    if not mas:
-                        continue
-                    az = float(mas[0])
-                    e = int(mas[i * 2 + 1])
-                    g = int(mas[i * 2 + 2])
-                    data.append((az, e, g))
-                res[name] = data
+        print('Чтение файла lovdat...')
+        with shelve.open('lovdat') as db:
+            names = list(db.keys())
+            # Form
+            choose = ChooseCamera(names.copy(), self)
+            choose.exec()
+            #########
+            for name in choose.cameras:
+                if name in db:
+                    res[name] = db[name]
         return res
 
 

@@ -9,7 +9,7 @@ class ChooseCamera(QDialog):
 
         self.checks = []
         layout = QVBoxLayout()
-        for cam in cameras:
+        for cam in sorted(cameras):
             check = QCheckBox(cam)
             check.setChecked(True)
             self.checks.append(check)
