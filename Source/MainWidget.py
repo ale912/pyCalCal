@@ -2,10 +2,11 @@ __author__ = 'Алексей Галкин'
 
 import datetime
 import shelve
+import time
 
 from PyQt5.QtWidgets import QWidget
 
-from Application.ChooseCamera import ChooseCamera
+from Source.ChooseCamera import ChooseCamera
 
 Cameras = {'4278': ((5, 1), (1, 0)),
            '5577': ((4, 1), (1, 1)),
@@ -21,6 +22,7 @@ class Data(list):
     производный класс от list
     каждый элемент содержит кортеж значений(угол погружения солнца, экспозиция, усиление)
     """
+
     def el(self, index):
         return self[index][0]
 
@@ -36,11 +38,11 @@ class Data(list):
     def gain(self, index):
         return self[index][2]
 
-class DtEl(tuple):
-    def dt(self):
-        return self[0]
-    def el(self):
-        return self[1]
+
+class DtEl:
+    def __init__(self, dt, el):
+        self.dt = dt
+        self.el = el
 
 
 def read_lovozero():
@@ -97,7 +99,9 @@ class MainWidget(QWidget):
     def __init__(self, QWidget_parent=None):
         QWidget.__init__(self, QWidget_parent)
 
+        start = time.time()
         self.calculate()
+        print('Time: {0} sec'.format(time.time() - start))
 
     def calculate(self):
         """
@@ -109,7 +113,7 @@ class MainWidget(QWidget):
             oldExps, oldGains, resultfiles = {k: 1 for k in lovdat}, {k: 1 for k in lovdat}, \
                                              {k: open('cal{0}.txt'.format(k), 'w') for k in lovdat}
             lovozero = read_lovozero()
-            dtel0 = DtEl(next(lovozero))
+            dtel0 = DtEl(*next(lovozero))
             oldLovozero = {k: dtel0 for k in lovdat}
             while True:
                 try:
@@ -118,7 +122,7 @@ class MainWidget(QWidget):
                     break
 
                 for cam_name in lovdat:
-                    exp, gain, dt0, el0 = 1, 1, oldLovozero[cam_name].dt(), oldLovozero[cam_name].el()
+                    exp, gain, dt0, el0 = 1, 1, oldLovozero[cam_name].dt, oldLovozero[cam_name].el
                     data = lovdat[cam_name]
                     if data.el(-1) > el0:
                         exp = data.exp(-1)
@@ -141,7 +145,7 @@ class MainWidget(QWidget):
                                     break
 
                     if (exp == 1 and gain == 1) or (exp == oldExps[cam_name] and gain == oldGains[cam_name]):
-                        oldLovozero[cam_name] = dt1, el1
+                        oldLovozero[cam_name] = DtEl(dt1, el1)
                         continue
 
                     oldExps[cam_name], oldGains[cam_name] = exp, gain
@@ -162,7 +166,7 @@ class MainWidget(QWidget):
 
                     print(line, file=resultfiles[cam_name])
 
-                    oldLovozero[cam_name] = dt1, el1
+                    oldLovozero[cam_name] = DtEl(dt1, el1)
         print('Готово')
 
     def read_lovdat(self):

@@ -1,7 +1,7 @@
 __author__ = 'Алексей Галкин'
 
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
-from Application.MainWidget import Data
+from Source.MainWidget import Data
 
 
 class CameraTable(QTableWidget):

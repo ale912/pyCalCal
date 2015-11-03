@@ -4,7 +4,7 @@ import sys
 
 from PyQt5.Qt import QApplication
 
-from Application.CameraEdit import CameraEdit
+from Source.CameraEdit import CameraEdit
 
 app = QApplication(sys.argv)
 c = CameraEdit()

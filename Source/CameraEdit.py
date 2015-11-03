@@ -3,8 +3,8 @@ __author__ = 'Алексей Галкин'
 import shelve
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QPushButton, QInputDialog, QLineEdit, \
     QMessageBox, QLabel
-from Application.CameraTable import CameraTable
-from Application.MainWidget import Data
+from Source.CameraTable import CameraTable
+from Source.MainWidget import Data
 
 path_lovdat = 'data/lovdat'
 
