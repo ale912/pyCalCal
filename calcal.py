@@ -1,4 +1,4 @@
-__author__ = 'Aleksey Galkin'
+__author__ = 'Алексей Галкин'
 
 import sys
 
