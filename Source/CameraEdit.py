@@ -3,8 +3,10 @@ __author__ = 'Алексей Галкин'
 import shelve
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QPushButton, QInputDialog, QLineEdit, \
     QMessageBox, QLabel
-from Application.CameraTable import CameraTable
-from Application.MainWidget import Data
+from Source.CameraTable import CameraTable
+from Source.MainWidget import Data
+
+path_lovdat = 'data/lovdat'
 
 
 class CameraEdit(QWidget):
@@ -14,11 +16,11 @@ class CameraEdit(QWidget):
         self.oldIndexCamera = 0
         self.nameLabel = QLabel('Название:')
         self.cameraViewComboBox = QComboBox()
-        self.cameraViewComboBox.currentIndexChanged.connect(self.changeCamera)
+        self.cameraViewComboBox.currentIndexChanged.connect(self.change_camera)
         self.addCameraButton = QPushButton('Добавить камеру')
-        self.addCameraButton.clicked.connect(self.addCamera)
+        self.addCameraButton.clicked.connect(self.addcamera_click)
         self.deleteCameraButton = QPushButton('Удалить камеру')
-        self.deleteCameraButton.clicked.connect(self.delete_camera)
+        self.deleteCameraButton.clicked.connect(self.deletecamera_click)
 
         layout0 = QHBoxLayout()
         layout0.addWidget(self.nameLabel)
@@ -27,75 +29,75 @@ class CameraEdit(QWidget):
         layout0.addWidget(self.deleteCameraButton)
 
         self.cameraTable = CameraTable()
-        self.addRow = QPushButton('Добавить строку')
-        self.addRow.clicked.connect(self.addRowCameraTable)
-        self.deleteRow = QPushButton('Удалить строку')
-        self.deleteRow.clicked.connect(self.deleteRowCameraTable)
+        self.addRowButton = QPushButton('Добавить строку')
+        self.addRowButton.clicked.connect(self.addrow_click)
+        self.deleteRowButton = QPushButton('Удалить строку')
+        self.deleteRowButton.clicked.connect(self.deleterow_click)
 
         layout1 = QVBoxLayout()
         layout1.addLayout(layout0)
         layout1.addWidget(self.cameraTable)
-        layout1.addWidget(self.addRow)
-        layout1.addWidget(self.deleteRow)
+        layout1.addWidget(self.addRowButton)
+        layout1.addWidget(self.deleteRowButton)
 
         self.setLayout(layout1)
 
         self.setWindowTitle('Камеры')
 
-        self.setMinimumSize(370, 500)
-        self.setMaximumSize(370, 500)
+        self.setMinimumSize(500, 500)
+        self.setMaximumSize(500, 500)
 
-        self.load_camera()
+        self.loadcamera()
 
-    def closeEvent(self, QCloseEvent):
+    def closeEvent(self, qcloseevent):
         self.save(self.cameraViewComboBox.currentIndex())
 
-    def changeCamera(self, index):
+    def change_camera(self, index):
         self.save(self.oldIndexCamera)
         self.load(index)
         self.oldIndexCamera = index
 
-    def addRowCameraTable(self):
+    def addrow_click(self):
         self.cameraTable.insertRow(self.cameraTable.rowCount())
 
-    def deleteRowCameraTable(self):
+    def deleterow_click(self):
         self.cameraTable.removeRow(self.cameraTable.currentRow())
 
-    def addCamera(self):
+    def addcamera_click(self):
         res = QInputDialog.getText(None, 'Введите название камеры', 'Название камеры:', QLineEdit.Normal, '')
         if res[1] and res[0]:
             self.cameraViewComboBox.addItem(res[0])
             self.cameraViewComboBox.setCurrentIndex(self.cameraViewComboBox.count() - 1)
-            self.cameraTable.setData(Data([]))
+            self.cameraTable.set_data(Data([]))
 
-    def delete_camera(self):
+    def deletecamera_click(self):
         res = QMessageBox.warning(None, 'Предупреждение!', 'Удалить данные о камере?', QMessageBox.Yes | QMessageBox.No,
                                   QMessageBox.No)
         if res == QMessageBox.Yes:
-            with shelve.open('lovdat') as db:
+            with shelve.open(path_lovdat) as db:
                 if self.cameraViewComboBox.currentText() in db:
                     del db[self.cameraViewComboBox.currentText()]
                 self.cameraViewComboBox.removeItem(self.cameraViewComboBox.currentIndex())
 
     def save(self, index_camera):
-        with shelve.open('lovdat') as db:
+        with shelve.open(path_lovdat) as db:
             text = self.cameraViewComboBox.itemText(index_camera)
             if text:
-                data = self.cameraTable.getData()
+                data = self.cameraTable.get_data()
                 if data:
                     db[text] = data
 
-    def load_camera(self):
-        with shelve.open('lovdat') as db:
+    def loadcamera(self):
+        with shelve.open(path_lovdat) as db:
             for key in db.keys():
                 self.cameraViewComboBox.addItem(key)
         self.load(self.cameraViewComboBox.currentIndex())
 
     def load(self, index_camera):
         self.cameraTable.clearContents()
-        with shelve.open('lovdat') as db:
+        with shelve.open(path_lovdat) as db:
             text = self.cameraViewComboBox.itemText(index_camera)
             if text in db:
                 data = db[text]
                 if data:
-                    self.cameraTable.setData(data)
+                    self.cameraTable.set_data(data)
