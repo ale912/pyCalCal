@@ -3,6 +3,7 @@ __author__ = 'Алексей Галкин'
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from Application.MainWidget import Data
 
+
 class CameraTable(QTableWidget):
     def __init__(self, parent=None):
         QTableWidget.__init__(self, parent)
@@ -23,7 +24,7 @@ class CameraTable(QTableWidget):
             self.setItem(p_int, 2, t2)
 
     def checkItem(self, r, c):
-        item = self.item(r,c)
+        item = self.item(r, c)
         try:
             if item.text():
                 return item.text()
@@ -35,9 +36,9 @@ class CameraTable(QTableWidget):
     def getData(self):
         data = Data([])
         for r in range(self.rowCount()):
-            az = float(self.checkItem(r,0))
-            exp = int(self.checkItem(r,1))
-            gain = int(self.checkItem(r,2))
+            az = float(self.checkItem(r, 0))
+            exp = int(self.checkItem(r, 1))
+            gain = int(self.checkItem(r, 2))
             data.append((az, exp, gain))
         return data
 

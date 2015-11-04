@@ -69,7 +69,8 @@ class CameraEdit(QWidget):
             self.cameraTable.setData(Data([]))
 
     def delete_camera(self):
-        res = QMessageBox.warning(None, 'Предупреждение!', 'Удалить данные о камере?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        res = QMessageBox.warning(None, 'Предупреждение!', 'Удалить данные о камере?', QMessageBox.Yes | QMessageBox.No,
+                                  QMessageBox.No)
         if res == QMessageBox.Yes:
             with shelve.open('lovdat') as db:
                 if self.cameraViewComboBox.currentText() in db:
